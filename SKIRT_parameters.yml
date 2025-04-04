@@ -16,6 +16,7 @@ OutputFilepaths:
   storeParticlesPath: "/cosma/home/do019/dc-gebe1/" # Folder where the .txt particle files are stored
   SKIRTinputFilePath: '/Users/agebek/Downloads/' # Path where the SKIRT input files will be stored
   skiFilepath: ""
+  haloPropertiesFile: "{simPath}/SKIRT/SKIRT_halo_properties_{snap_nr:04d}.hdf5" # Path where SOAP-like halo datasets will be stored from integrated halo SEDs
 
 SelectionCriteria:
   minStellarMass: 1e9 # Lower stellar mass limit for halo selection in Msun

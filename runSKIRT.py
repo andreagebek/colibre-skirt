@@ -67,8 +67,6 @@ sampleFolder = params['OutputFilepaths']['sampleFolder'].format(simPath=simPath)
 txtFilePath = params['OutputFilepaths']['storeParticlesPath'].format(simPath=simPath) # Path to the COLIBRE particle .txt files
 SKIRTinputFilePath = params['OutputFilepaths']['SKIRTinputFilePath'].format(simPath=simPath) # Path where the SKIRT input files will be stored
 
-print(sampleFolder)
-
 # Set list of snapshots to postprocess
 
 Nprocesses = args.nproc
