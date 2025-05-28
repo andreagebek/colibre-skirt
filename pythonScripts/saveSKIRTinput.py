@@ -9,6 +9,7 @@ import unyt
 import sys
 import warnings
 from datetime import datetime
+from vIMF import IMFParameters, sigmoid
 
 startTime = datetime.now()
 
@@ -38,7 +39,20 @@ if np.shape(stars_file) != (1, 0): # At least one star particle
     stars_M = unyt.unyt_array(stars_file[:, 4], 'Msun')
     stars_Z = unyt.unyt_array(stars_file[:, 5], 'dimensionless')
     stars_age = unyt.unyt_array(stars_file[:, 6], 'yr')
+   
+    # Compute vIMF high mass slope
 
+    # Set IMF parameters
+    alpha_min, alpha_max, sigma, pivot = IMFParameters(load_snapshot(snapshot_file))
+
+
+    if alpha_min != alpha_max:
+        stars_nH = sg.stars.birth_densities.to_value('g/cm**3')/unyt.mh
+        stars_slope = -1 * sigmoid(stars_nH, alpha_min, alpha_max, sigma, pivot)
+    else:
+        stars_slope = np.full(len(stars_age), 2.3)
+
+    stars_slope = unyt.unyt_array(stars_slope, 'dimensionless') # High mass (> 0.5 Msolar) IMF slope
 
     old_stars_mask = (stars_age >= old_stars_tmin)
 
