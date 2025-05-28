@@ -19,7 +19,7 @@
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
                         <sedFamily type="SEDFamily">
-                            <BpassChabrier100SEDFamily/>
+                            <FSPSSEDFamily/>
                         </sedFamily>
                         <wavelengthBiasDistribution type="WavelengthDistribution">
                             <DefaultWavelengthDistribution/>
@@ -30,7 +30,7 @@
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
                         <sedFamily type="SEDFamily">
-                            <ToddlersSEDFamily sedMode="SFRNormalized" stellarTemplate="BPASSChab100Bin" includeDust="true" resolution="Low" sfrPeriod="Period0Myr"/>
+                            <ToddlersSEDFamily sedMode="SFRNormalized" stellarTemplate="BPASSChab100Bin" includeDust="false" resolution="Low" sfrPeriod="Period10Myr"/>
                         </sedFamily>
                         <wavelengthBiasDistribution type="WavelengthDistribution">
                             <DefaultWavelengthDistribution/>
@@ -198,6 +198,11 @@
         <instrumentSystem type="InstrumentSystem">
             <InstrumentSystem>
                 <instruments type="Instrument">
+                    <FrameInstrument instrumentName="image" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" fieldOfViewX="100 kpc" numPixelsX="512" centerX="0" fieldOfViewY="100 kpc" numPixelsY="512" centerY="0" recordComponents="false" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
+                        <wavelengthGrid type="WavelengthGrid">
+                            <PredefinedBandWavelengthGrid includeGALEX="false" includeSDSS="true" include2MASS="false" includeWISE="false" includeHERSCHEL="false"/>
+                        </wavelengthGrid>
+                    </FrameInstrument>
                     <SEDInstrument instrumentName="SED_tot" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="0 pc" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
                         <wavelengthGrid type="WavelengthGrid">
                             <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="500"/>

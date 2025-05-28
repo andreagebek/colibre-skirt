@@ -20,50 +20,35 @@ from swiftsimio.objects import cosmo_array, cosmo_factor, a
 
 # Set simName
 parser = argparse.ArgumentParser(
-    description="Script to create particle .txt files, based on Kyle Oman's swiftgalaxy framework."
+    description="Select COLIBRE halos and store some global information."
 )
 
 parser.add_argument(
-    "BoxSize",
-    type=int,
-    help="Boxsize of the simulation in Mpc.",
-)
-
-parser.add_argument(
-    "Resolution",
-    type=int,
-    help="Particle mass resolution of the simulation in log10(M/Msun).",
+    "simName",
+    type=str,
+    help="Simulation name.",
 )
 
 parser.add_argument(
     "--snaps",
     type=int,
-    required=True,
     nargs='+',
     help="<Required> Snapshot number(s).",
 )
 
-parser.add_argument(
-    "--mode",
-    type=str,
-    default="Thermal", # Thermal AGN feedback with non-equilibrium chemistry
-    help="Simulation mode (default: Thermal).",
-)
 
 args = parser.parse_args()
 
-sim = 'L{:03.0f}_m{:01.0f}'.format(args.BoxSize, args.Resolution)
-simName = sim + '/' + args.mode
-
 # Define filepaths from parameter file
-dir_path = os.path.dirname(os.path.realpath(__file__))
-with open(f'{dir_path}/../SKIRT_parameters.yml','r') as stream:
+dir_path =  os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+with open(f'{dir_path}/SKIRT_parameters.yml','r') as stream:
     params = yaml.safe_load(stream)
 
-simPath = params['ColibreFilepaths']['simPath'].format(simName=simName)
-sampleFolder = params['ColibreFilepaths']['sampleFolder'].format(simPath=simPath)
-storeParticlesPath = params['ColibreFilepaths']['storeParticlesPath'].format(simPath=simPath) # Folder where the .txt particle files are stored
+simPath = params['InputFilepaths']['simPath'].format(simName=args.simName)
+sampleFolder = params['OutputFilepaths']['sampleFolder'].format(simPath=simPath)
+storeParticlesPath = params['OutputFilepaths']['storeParticlesPath'].format(simPath=simPath) # Folder where the .txt particle files are stored
 
+os.system(f'mkdir -p {storeParticlesPath}')
 
 gas_header = 'Column 1: x (pc)\n' + \
     'Column 2: y (pc)\n' + \
@@ -171,8 +156,8 @@ for snap in args.snaps:
 
     startTime = datetime.now()
 
-    catalogue_file = params['ColibreFilepaths']['catalogueFile'].format(simPath=simPath,snap_nr=snap)
-    virtual_snapshot_file = params['ColibreFilepaths']['virtualSnapshotFile'].format(simPath=simPath,snap_nr=snap)
+    catalogue_file = params['InputFilepaths']['catalogueFile'].format(simPath=simPath,snap_nr=snap)
+    virtual_snapshot_file = params['InputFilepaths']['virtualSnapshotFile'].format(simPath=simPath,snap_nr=snap)
 
     catalogue = load_snapshot(catalogue_file)
 
@@ -216,8 +201,8 @@ for snap in args.snaps:
         # virtual snapshot does not exist 
         # run SWIFTGalaxies without membership information first
         
-        snapshot_file = params['ColibreFilepaths']['SnapshotFile'].format(simPath=simPath,snap_nr=snap)
-        membership_file = params['ColibreFilepaths']['membershipFile'].format(simPath=simPath,snap_nr=snap)
+        snapshot_file = params['InputFilepaths']['SnapshotFile'].format(simPath=simPath,snap_nr=snap)
+        membership_file = params['InputFilepaths']['membershipFile'].format(simPath=simPath,snap_nr=snap)
         
         sgs = SWIFTGalaxies(
             snapshot_file,

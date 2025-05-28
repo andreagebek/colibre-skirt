@@ -1,8 +1,6 @@
-ColibreFilepaths:
-  simPath: "/cosma8/data/dp004/colibre/Runs/{simName}" # Path to COLIBRE simulation
-  sampleFolder: "/cosma/home/do019/dc-gebe1/" # Folder where the galaxy sample .txt files will be stored
-  storeParticlesPath: "/cosma/home/do019/dc-gebe1/" # Folder where the COLIBRE particle .txt files will be stored
-
+InputFilepaths:
+  skiFilepath: "/mnt/aridata1/users/ariadurr/WORK/Processing/colibre-skirt/template_v{skifileversion}.ski" # The path to the ski file
+  simPath: "/mnt/aridata1/users/ariadurr/WORK/Simulations/{simName}" # Path to COLIBRE simulation
   catalogueFile: "{simPath}/SOAP/halo_properties_{snap_nr:04d}.hdf5"
 
   # If the snapshots are distributed
@@ -12,13 +10,19 @@ ColibreFilepaths:
   snapshotFile: "{simPath}/snapshots/colibre_{snap_nr:04d}.hdf5"
   membershipFile: "{simPath}/SOAP/membership_{snap_nr:04d}.hdf5"
 
-SkirtFilepaths:
-  skiFilepath: "/Users/agebek/Projects/Colibre/colibre-skirt/template_v{skifileversion}.ski" # The path to the ski file
-  sampleFolder: "/Users/agebek/Downloads/TESTING/" # Folder where the galaxy sample .txt files are stored (for SKIRT run)
-  storeParticlesPath: "/Users/agebek/Downloads/TESTING/particleData/" # Folder where the .txt particle files are stored (for SKIRT run)
-  SKIRTinputFilePath: '/Users/agebek/Downloads/TESTING/SKIRTinputFiles/' # Path where the SKIRT input files will be stored
-  SKIRToutputFilePath: '/Users/agebek/Downloads/TESTING/SKIRToutputFiles/' # Path where the SKIRT output files will be stored
+OutputFilepaths:
+  sampleFolder: "{simPath}/SKIRT/SampleFiles/" # Folder where the galaxy sample .txt files will be stored
+  storeParticlesPath: "{simPath}/SKIRT/SampleFiles/" # Folder where the COLIBRE particle .txt files will be stored
+  SKIRTinputFilePath: "{simPath}/SKIRT/InputFiles/" # Path where the SKIRT input files will be stored
+  SKIRToutputFilePath: "{simPath}/SKIRT/OutputFiles/FSPSChabrier100_Npp_1e5/" # Path where the SKIRT output files will be stored
 
 SelectionCriteria:
-  minStellarMass: 1e9 # Lower stellar mass limit for halo selection in Msun
-  maxStellarMass: 1.05e9 # Upper stellar mass limit for halo selection in Msun
+  minStellarMass: 5.0e10 # Lower stellar mass limit for halo selection in Msun
+  maxStellarMass: 8.0e10 # Upper stellar mass limit for halo selection in Msun
+  maxNumHalos: 4 # Max number of halos to select in the given mass range
+
+ModelParameters:
+  SKIRTboxsize: 100 # in kpc
+  starsMaxAge: 10 # in Myr, stars younger than this age are modelled from SF gas. This must match TODDLERS SFR period.
+  photonPackets: 1.0e5 # Number of photon packets
+  binTreeMaxLevel: 36 # Max refinement level of the spatial grid

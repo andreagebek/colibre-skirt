@@ -13,14 +13,18 @@ import yaml
 
 startTime = datetime.now()
 
+# Define filepaths from parameter file
+dir_path =  os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+with open(f'{dir_path}/SKIRT_parameters.yml','r') as stream:
+    params = yaml.safe_load(stream)
+
 # Global settings
 
-SKIRTboxsize = unyt.unyt_quantity(100., 'kpc')
-old_stars_tmin = unyt.unyt_quantity(10., 'Myr') # Minimum age in Myr for an evolved star particle. Also determines the TODDLERS averaging timescale
-# Don't change this unless you know what you're doing :)
+SKIRTboxsize = unyt.unyt_quantity(params['ModelParameters']['SKIRTboxsize'], 'kpc')
+old_stars_tmin = unyt.unyt_quantity(params['ModelParameters']['starsMaxAge'], 'Myr') # Minimum age in Myr for an evolved star particle. Also determines the TODDLERS averaging timescale
 
-Npp = int(10**7.5) # Number of photon packets
-binTreeMaxLevel = 36 # Max refinement level of the spatial grid
+Npp = int(float(params['ModelParameters']['photonPackets'])) # Number of photon packets
+binTreeMaxLevel = params['ModelParameters']['binTreeMaxLevel'] # Max refinement level of the spatial grid
 
 snapNum = sys.argv[1]
 haloID = sys.argv[2]
@@ -34,18 +38,13 @@ skifileversion = '4.0'
 
 mediumXMLlineDict = {'4.0': (40, 197)} # Lines in the .ski file that describe the medium system
 
-# Define filepaths from parameter file
-dir_path = os.path.dirname(os.path.realpath(__file__))
-with open(f'{dir_path}/../SKIRT_parameters.yml','r') as stream:
-    params = yaml.safe_load(stream)
-
 # Edit ski file
 
 def editSki(snapNum, haloID, Rstar):
 
     SKIRTinputFiles = SKIRTinputFilePath + 'snap' + snapNum + '_ID' + haloID
 
-    skifilename = params['SkirtFilepaths']['skiFilepath'].format(skifileversion=skifileversion)
+    skifilename = params['InputFilepaths']['skiFilepath'].format(skifileversion=skifileversion)
 
     skifilename_halo = 'snap' + snapNum + '_ID' + haloID + '.ski'
 
