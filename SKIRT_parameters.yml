@@ -14,7 +14,7 @@ OutputFilepaths:
   sampleFolder: "{simPath}/SKIRT/SampleFiles/" # Folder where the galaxy sample .txt files will be stored
   storeParticlesPath: "{simPath}/SKIRT/SampleFiles/" # Folder where the COLIBRE particle .txt files will be stored
   SKIRTinputFilePath: "{simPath}/SKIRT/InputFiles/" # Path where the SKIRT input files will be stored
-  SKIRToutputFilePath: "{simPath}/SKIRT/OutputFiles/FSPSChabrier100_Npp_1e5/" # Path where the SKIRT output files will be stored
+  SKIRToutputFilePath: "{simPath}/SKIRT/OutputFiles/FSPSChabrier100_Npp_100_face_on/" # Path where the SKIRT output files will be stored
 
 SelectionCriteria:
   minStellarMass: 5.0e10 # Lower stellar mass limit for halo selection in Msun
@@ -24,5 +24,6 @@ SelectionCriteria:
 ModelParameters:
   SKIRTboxsize: 100 # in kpc
   starsMaxAge: 10 # in Myr, stars younger than this age are modelled from SF gas. This must match TODDLERS SFR period.
-  photonPackets: 1.0e5 # Number of photon packets
+  photonPackets: 100 # Number of photon packets per gas particle
   binTreeMaxLevel: 36 # Max refinement level of the spatial grid
+  rotation: "face_on" # Option to rotate galaxy based on the angular momentum vector of stars

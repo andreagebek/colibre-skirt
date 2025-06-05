@@ -18,25 +18,25 @@ dir_path =  os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 with open(f'{dir_path}/SKIRT_parameters.yml','r') as stream:
     params = yaml.safe_load(stream)
 
-# Global settings
-
-SKIRTboxsize = unyt.unyt_quantity(params['ModelParameters']['SKIRTboxsize'], 'kpc')
-old_stars_tmin = unyt.unyt_quantity(params['ModelParameters']['starsMaxAge'], 'Myr') # Minimum age in Myr for an evolved star particle. Also determines the TODDLERS averaging timescale
-
-Npp = int(float(params['ModelParameters']['photonPackets'])) # Number of photon packets
-binTreeMaxLevel = params['ModelParameters']['binTreeMaxLevel'] # Max refinement level of the spatial grid
-
 snapNum = sys.argv[1]
 haloID = sys.argv[2]
 Rstar = float(sys.argv[3])
 
-txtFilePath = sys.argv[4]
+txtFilePath = sys.argv[4] # particle data 
 SKIRTinputFilePath = sys.argv[5]
 simPath = sys.argv[6]
 
 skifileversion = '4.0'
 
 mediumXMLlineDict = {'4.0': (40, 197)} # Lines in the .ski file that describe the medium system
+
+# Global settings
+
+SKIRTboxsize = unyt.unyt_quantity(params['ModelParameters']['SKIRTboxsize'], 'kpc')
+old_stars_tmin = unyt.unyt_quantity(params['ModelParameters']['starsMaxAge'], 'Myr') # Minimum age in Myr for an evolved star particle. Also determines the TODDLERS averaging timescale
+
+Npp_per_par = int(float(params['ModelParameters']['photonPackets'])) # Number of photon packets per gas particle
+binTreeMaxLevel = params['ModelParameters']['binTreeMaxLevel'] # Max refinement level of the spatial grid
 
 # Edit ski file
 
@@ -57,6 +57,8 @@ def editSki(snapNum, haloID, Rstar):
         warnings.simplefilter('ignore') # Ignore warning if file is empty
         gas_file = np.atleast_2d(np.loadtxt(txtFilePath + 'snap' + snapNum + '_ID' + haloID + '_gas.txt')) # Calculate dust surface density from the 
         # original gas particle data, to avoid issues with negative dust masses due to TODDLERS dust subtraction
+        
+        Npp = Npp_per_par * len(gas_file)
     
     if np.shape(gas_file) == (1, 10): # Only one gas particle
 

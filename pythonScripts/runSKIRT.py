@@ -33,6 +33,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+        "--ID",
+        type=int,
+        default=None,
+        help="HBT track ID to run SKIRT simulations for (default: None, uses sample.txt file for IDs).",
+)
+
+parser.add_argument(
         "--n_mpi",
         type=int,
         default=3,
@@ -80,6 +87,9 @@ def preprocess(snapList):
 
         for idx, ID in enumerate(halo_IDs):
 
+            if args.ID != None and ID != args.ID:
+                continue
+
             skifilenames.append( 'snap' + str(snap) + '_ID' + str(ID) )
 
             # Save SKIRT input files
@@ -113,6 +123,9 @@ def postprocess(snapList):
 
         for idx, ID in enumerate(halo_IDs):
 
+            if args.ID != None and ID != args.ID:
+                continue
+
             sim_name = 'snap' + str(snap) + '_ID' + str(ID)
             
             os.system(f'mv {sim_name}* {SKIRToutputFilePath}/')
@@ -125,7 +138,7 @@ def main():
         
         pool.map(runSKIRT, skifilenames)
 
-    postprocess(args.snaps)
+    # postprocess(args.snaps)
 
 if __name__=="__main__":
 

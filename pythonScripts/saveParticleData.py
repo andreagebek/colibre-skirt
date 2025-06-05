@@ -16,6 +16,7 @@ import yaml
 import argparse
 import os
 import h5py
+import scipy
 from swiftsimio.objects import cosmo_array, cosmo_factor, a
 
 # Set simName
@@ -47,6 +48,8 @@ with open(f'{dir_path}/SKIRT_parameters.yml','r') as stream:
 simPath = params['InputFilepaths']['simPath'].format(simName=args.simName)
 sampleFolder = params['OutputFilepaths']['sampleFolder'].format(simPath=simPath)
 storeParticlesPath = params['OutputFilepaths']['storeParticlesPath'].format(simPath=simPath) # Folder where the .txt particle files are stored
+
+rotation_mode = params['ModelParameters']['rotation']
 
 os.system(f'mkdir -p {storeParticlesPath}')
 
@@ -98,7 +101,7 @@ def attach_membership_info_to_sg_and_mask(sg, membership_filename):
     sg.mask_particles(extra_mask)
     return
 
-def analysis(sg, halo_ID, Mstar, snap):
+def analysis(sg, halo_ID, Mstar, snap, angular_momentum_vector):
     # this function can also have additional args & kwargs, if needed
     # it should only access the pre-loaded data fields
 
@@ -109,11 +112,32 @@ def analysis(sg, halo_ID, Mstar, snap):
             sg, 
             membership_file
         )
-    
+
+    # Coordinates
+    stars_coordinates = sg.stars.coordinates.to('pc').to_physical().value
+    gas_coordinates = sg.gas.coordinates.to('pc').to_physical().value
+
+    if rotation_mode != 'None':
+        
+        if rotation_mode == 'face_on':
+            alignment_vector = [0, 0, 1]
+        elif rotation_mode == 'edge_on':
+            alignment_vector = [0, 1, 0]
+        else:
+            raise Warning('The rotation parameter can only be None, face_on or edge_on.')
+        
+        angular_momentum_vector /= np.linalg.norm(angular_momentum_vector)
+        
+        rotation_matrix,_ = scipy.spatial.transform.Rotation.align_vectors(alignment_vector, angular_momentum_vector)
+        rotation_matrix.as_matrix()
+        
+        stars_coordinates = rotation_matrix.apply(stars_coordinates)
+        gas_coordinates = rotation_matrix.apply(gas_coordinates)
+
     # Star particles
     #
 
-    stars_x, stars_y, stars_z = sg.stars.coordinates.to('pc').to_physical().T
+    stars_x, stars_y, stars_z = stars_coordinates.T
     # Recalculate stellar smoothing lengths, following COLIBRE tutorials
     if Mstar >= unyt.unyt_quantity(10**(8.5), 'Msun'):
         stars_sml = gsl((sg.stars.coordinates + sg.centre) % sg.metadata.boxsize, sg.metadata.boxsize,
@@ -128,11 +152,10 @@ def analysis(sg, halo_ID, Mstar, snap):
 
     np.savetxt(storeParticlesPath + 'snap' + str(snap) + '_ID' + str(halo_ID) + '_stars.txt', stars_params, fmt = '%.6e', header = stars_header)
 
-
     # Gas particles
     #
 
-    gas_x, gas_y, gas_z = sg.gas.coordinates.to('pc').to_physical().T
+    gas_x, gas_y, gas_z = gas_coordinates.T
     gas_sml = sg.gas.smoothing_lengths.to('pc').to_physical() * 2.018932
     gas_Z = sg.gas.metal_mass_fractions.to_physical()
     gas_SFR = sg.gas.star_formation_rates.to_physical().to('Msun/yr') # Instantaneous SFRs
@@ -142,11 +165,10 @@ def analysis(sg, halo_ID, Mstar, snap):
     gas_fDust = np.array([getattr(sg.gas.dust_mass_fractions, name) for name in DustSpecies]).T
     dust_M = (gas_fDust * np.atleast_1d(gas_M)[:, np.newaxis].repeat(6, axis = 1)).to('Msun').to_physical()
 
+
     gas_params = np.transpose([gas_x, gas_y, gas_z, gas_sml, gas_Z, gas_SFR, gas_SFR_10Myr,
                             dust_M[:, 0], dust_M[:, 1], dust_M[:, 2], dust_M[:, 3], dust_M[:, 4], dust_M[:, 5]])
 
-
-    
     np.savetxt(storeParticlesPath + 'snap' + str(snap) + '_ID' + str(halo_ID) + '_gas.txt', gas_params, fmt = '%.6e', header = gas_header)
 
     return None
@@ -161,7 +183,8 @@ for snap in args.snaps:
 
     catalogue = load_snapshot(catalogue_file)
 
-    halo_IDs_all = catalogue.input_halos.halo_catalogue_index.value
+    halo_IDs_all = catalogue.input_halos_hbtplus.track_id.value
+    # halo_IDs_all = catalogue.input_halos.halo_catalogue_index.value
 
     halo_IDs = np.loadtxt(sampleFolder + '/sample_' + str(snap) + '.txt', usecols = 0)
     halo_IDs = halo_IDs.astype(int)
@@ -177,14 +200,18 @@ for snap in args.snaps:
 
     Mstar = unyt.unyt_array(catalogue.bound_subhalo.stellar_mass[SEL].to_physical()) # Convert the cosmo arrays to unyt arrays (without the "Physical" attribute).
 
-    print(len(SEL[SEL]), 'galaxies in snapshot', snap, 'selected.')
+    print(len(SEL[SEL]), 'galaxies selected in snapshot', snap, 'from galaxy samples.')
 
     soap = SOAP(catalogue_file, soap_index = halo_indices)
 
-    preload_fields = {'stars.coordinates', 'stars.smoothing_lengths', 'stars.metal_mass_fractions', 'stars.initial_masses', 'stars.ages',
-                    'gas.coordinates', 'gas.smoothing_lengths', 'gas.masses', 'gas.metal_mass_fractions', 'gas.star_formation_rates', 'gas.averaged_star_formation_rates',
-                    'gas.dust_mass_fractions.GraphiteLarge', 'gas.dust_mass_fractions.MgSilicatesLarge', 'gas.dust_mass_fractions.FeSilicatesLarge',
-                    'gas.dust_mass_fractions.GraphiteSmall', 'gas.dust_mass_fractions.MgSilicatesSmall', 'gas.dust_mass_fractions.FeSilicatesSmall'}
+    stellar_angular_momentum_vector = (catalogue.exclusive_sphere_50kpc.angular_momentum_stars.value)[halo_indices] # I assume I can take this from sgs 
+
+    preload_fields = {
+        'stars.coordinates', 'stars.smoothing_lengths', 'stars.metal_mass_fractions', 'stars.initial_masses', 'stars.ages',
+        'gas.coordinates', 'gas.smoothing_lengths', 'gas.masses', 'gas.metal_mass_fractions', 'gas.star_formation_rates', 'gas.averaged_star_formation_rates',
+        'gas.dust_mass_fractions.GraphiteLarge', 'gas.dust_mass_fractions.MgSilicatesLarge', 'gas.dust_mass_fractions.FeSilicatesLarge',
+        'gas.dust_mass_fractions.GraphiteSmall', 'gas.dust_mass_fractions.MgSilicatesSmall', 'gas.dust_mass_fractions.FeSilicatesSmall'
+    }
 
     if os.path.exists(virtual_snapshot_file):
         sgs = SWIFTGalaxies(
@@ -220,6 +247,6 @@ for snap in args.snaps:
             attach_membership_info_to_sg_and_mask(sg, membership_file)
 
     # map accepts arguments `args` and `kwargs`, passed through to function, if needed
-    sgs.map(analysis, args = list(zip(halo_IDs, Mstar, np.full(len(Mstar), snap))))
+    sgs.map(analysis, args = list(zip(halo_IDs, Mstar, np.full(len(Mstar), snap), stellar_angular_momentum_vector)))
 
     print('Elapsed time for snapshot', snap, ':', datetime.now() - startTime)

@@ -28,6 +28,14 @@ parser.add_argument(
     help="<Required> Snapshot number(s).",
 )
 
+parser.add_argument(
+    "--IDs",
+    type=int,
+    nargs='+',
+    default=-1,
+    help="Halo IDs to run SKIRT simulations for, based on HBT track IDs.",
+)
+
 
 args = parser.parse_args()
 
@@ -52,24 +60,29 @@ for snap in args.snaps:
     catalogue_file = params['InputFilepaths']['catalogueFile'].format(simPath=simPath,snap_nr=snap)
     catalogue = load_snapshot(catalogue_file)
    
-    halo_IDs = catalogue.input_halos.halo_catalogue_index.value
+    halo_track_IDs = catalogue.input_halos_hbtplus.track_id.value
+    # halo_IDs = catalogue.input_halos.halo_catalogue_index.value
 
     Mstar = unyt.unyt_array(catalogue.bound_subhalo.stellar_mass.to_physical())
     Rstar = unyt.unyt_array(catalogue.bound_subhalo.half_mass_radius_stars.to_physical())
 
-    SEL = (Mstar >= unyt.unyt_quantity(float(params['SelectionCriteria']['minStellarMass']), 'Msun')) * (Mstar <= unyt.unyt_quantity(float(params['SelectionCriteria']['maxStellarMass']), 'Msun')) # Simple stellar mass selection. Replace this with 
-    # your selection criteria.
+    if args.IDs != -1:
+        SEL = np.isin(halo_track_IDs, args.IDs)
+    
+    else:
+        SEL = (Mstar >= unyt.unyt_quantity(float(params['SelectionCriteria']['minStellarMass']), 'Msun')) * (Mstar <= unyt.unyt_quantity(float(params['SelectionCriteria']['maxStellarMass']), 'Msun')) # Simple stellar mass selection. Replace this with 
+        # your selection criteria.
 
-    max_number = params['SelectionCriteria']['maxNumHalos']
-    count = 0
-    for sel_i,selection in enumerate(SEL):
-        if selection == True and count == max_number:
-            SEL[sel_i] = False
-        elif selection == True:
-            count += 1
+        max_number = params['SelectionCriteria']['maxNumHalos']
+        count = 0
+        for sel_i,selection in enumerate(SEL):
+            if selection == True and count == max_number:
+                SEL[sel_i] = False
+            elif selection == True:
+                count += 1
 
     print(len(SEL[SEL]), 'galaxies selected in snapshot', snap)
 
-    sample_file = np.vstack((halo_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value)).T[SEL, :]
+    sample_file = np.vstack((halo_track_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value)).T[SEL, :]
 
     np.savetxt(sampleFolder + 'sample_' + str(snap) + '.txt', sample_file, fmt = ['%d', '%.6e', '%.4f'], header = header)
