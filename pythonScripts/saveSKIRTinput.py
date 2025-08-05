@@ -49,7 +49,7 @@ if np.shape(stars_file) != (1, 0): # At least one star particle
     stars_birthDensity = unyt.unyt_array(stars_file[:, 7], 'Msun/pc**3')
     stars_SFR = 0.01 * np.sqrt(32. * unyt.physical_constants.G / (3. * np.pi)) * np.sqrt(stars_birthDensity) * stars_M # Based on the gas density at the birth of the star particle
     corr_factor = (old_stars_tmin - stars_age) / old_stars_tmin # Correction factor (see Joop's comment on slack)
-    stars_SFR = stars_SFR.to('Msun/yr')
+    stars_SFR = stars_SFR.to('Msun/yr') * corr_factor
 
     old_stars_mask = (stars_age >= old_stars_tmin)
 
