@@ -19,7 +19,7 @@ old_stars_tmin = unyt.unyt_quantity(10., 'Myr') # Minimum age in Myr for an evol
 # Don't change this unless you know what you're doing :)
 
 Npp = int(10**4.5) # Number of photon packets
-binTreeMaxLevel = 26 # Max refinement level of the spatial grid
+binTreeMaxLevel = 36 # Max refinement level of the spatial grid
 
 snapNum = sys.argv[1]
 haloID = sys.argv[2]
