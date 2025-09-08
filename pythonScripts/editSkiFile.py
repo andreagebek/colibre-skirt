@@ -11,6 +11,39 @@ import unyt
 import os
 import yaml
 
+def delete_medium_system(ski_file):
+    """
+    Delete the entire block from <mediumSystem ...> to </mediumSystem> in a .ski file when 'NoMedium' is used
+    """
+
+    # Read all lines from the file
+    with open(ski_file, 'r') as f:
+        lines = f.readlines()
+
+    new_lines = []
+    skip = False
+
+    for line in lines:
+
+        # Detect the start tag
+        if '<mediumSystem' in line:
+            skip = True
+            continue
+
+        # Detect the end tag
+        if '</mediumSystem>' in line:
+            skip = False
+            continue
+
+        # Keep lines that are not within the mediumSystem block
+        if not skip:
+            new_lines.append(line)
+
+
+    # Overwrite the original file with the new content
+    with open(ski_file, 'w') as f:
+        f.writelines(new_lines)
+
 startTime = datetime.now()
 
 # Global settings
@@ -59,65 +92,70 @@ def editSki(snapNum, haloID, Rstar):
 
     # Calculate max dust fraction based on particle data
 
+    subprocess.run(['perl', '-pi', '-e', 's/maxLevel=\"0/maxLevel=\"' + str(binTreeMaxLevel) + '/g', skifilename_halo])
+
+    subprocess.run(['perl', '-pi', '-e', 's#dust.txt#' + SKIRTinputFiles + '_dust.txt#g', skifilename_halo])
+
+    subprocess.run(['perl', '-pi', '-e', 's/minX=\"-0/minX=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/maxX=\"0/maxX=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/minY=\"-0/minY=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/maxY=\"0/maxY=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/minZ=\"-0/minZ=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/maxZ=\"0/maxZ=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+
+
     with warnings.catch_warnings():
         warnings.simplefilter('ignore') # Ignore warning if file is empty
         gas_file = np.atleast_2d(np.loadtxt(txtFilePath + 'snap' + snapNum + '_ID' + haloID + '_gas.txt')) # Calculate dust surface density from the 
         # original gas particle data, to avoid issues with negative dust masses due to TODDLERS dust subtraction
-    
-    if np.shape(gas_file) == (1, 10): # Only one gas particle
 
-        maxDustFraction = 10**(-4.5)
-    
-    elif np.size(gas_file, axis = 1) > 0: # 2 or more gas particles
+    if np.size(gas_file, axis = 1) > 0: # if there are gas particles
 
         dust_r = np.sqrt(gas_file[:, 0]**2 + gas_file[:, 1]**2 + gas_file[:, 2]**2) * 1e-3 # In kpc
+
         dust_m = np.sum(gas_file[:, 10:], axis = 1) # In Msun
 
+        if (dust_m>0).sum() >= 2: # if there are more than 2 gas particles containing dust
 
-        dustMasses_sorted = dust_m[np.argsort(dust_r)]
+            dustMasses_sorted = dust_m[np.argsort(dust_r)]
 
-        idx_halfmass = np.min(np.argwhere((np.cumsum(dustMasses_sorted) / np.sum(dustMasses_sorted)) >= 0.5))
+            idx_halfmass = np.min(np.argwhere((np.cumsum(dustMasses_sorted) / np.sum(dustMasses_sorted)) >= 0.5))
 
-        dustHalfMassRadius = np.sort(dust_r)[idx_halfmass]
+            dustHalfMassRadius = np.sort(dust_r)[idx_halfmass]
 
-        dustHalfMass = (np.sum(dust_m) / 2.)
+            dustHalfMass = (np.sum(dust_m) / 2.)
 
-        SigmaDust = dustHalfMass / (np.pi * dustHalfMassRadius**2) # In solar masses / kpc^2
+            SigmaDust = dustHalfMass / (np.pi * dustHalfMassRadius**2) # In solar masses / kpc^2
 
-        maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
+            maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
 
-        subprocess.run(['perl', '-pi', '-e', 's/maxLevel=\"0/maxLevel=\"' + str(binTreeMaxLevel) + '/g', skifilename_halo])
+            subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
 
-        subprocess.run(['perl', '-pi', '-e', 's#dust.txt#' + SKIRTinputFiles + '_dust.txt#g', skifilename_halo])
+        
 
-        subprocess.run(['perl', '-pi', '-e', 's/minX=\"-0/minX=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
-        subprocess.run(['perl', '-pi', '-e', 's/maxX=\"0/maxX=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
-        subprocess.run(['perl', '-pi', '-e', 's/minY=\"-0/minY=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
-        subprocess.run(['perl', '-pi', '-e', 's/maxY=\"0/maxY=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
-        subprocess.run(['perl', '-pi', '-e', 's/minZ=\"-0/minZ=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
-        subprocess.run(['perl', '-pi', '-e', 's/maxZ=\"0/maxZ=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
+        elif (dust_m>0).sum()==1: # if there are only one gas particle containing dust
 
-        subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
+            maxDustFraction = 10**(-4.5)
 
+            subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
+
+
+
+        else:# if there is gas particles but dust mass is all 0
+
+            subprocess.run(['perl', '-pi', '-e', 's/simulationMode="[^"]*"/simulationMode="NoMedium"/g', skifilename_halo])
+
+            delete_medium_system(skifilename_halo)
+            
     else:
-    
+
         # Change the skirt simulation to noMedium
+        
+        subprocess.run(['perl', '-pi', '-e', 's/simulationMode="[^"]*"/simulationMode="NoMedium"/g', skifilename_halo])
 
-        subprocess.run(['perl', '-pi', '-e', 's/simulationMode=\"DustEmission/simulationMode=\"NoMedium/g', skifilename_halo])
+        delete_medium_system(skifilename_halo)
 
-        with open(skifilename_halo, 'r+') as fp:
-            # read and store all lines into list
-            lines = fp.readlines()
-            # move file pointer to the beginning of a file
-            fp.seek(0)
-            # truncate the file
-            fp.truncate()
 
-            # start writing lines
-            # iterate line and line number
-            for number, line in enumerate(lines):
-                if number <= 40 or number >= 216:
-                    fp.write(line)
 
 
     subprocess.run(['perl', '-pi', '-e', 's/numPackets=\"0/numPackets=\"' + str(Npp) + '/g', skifilename_halo])
