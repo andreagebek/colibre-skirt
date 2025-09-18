@@ -69,7 +69,6 @@ txtFilePath = params['SkirtFilepaths']['storeParticlesPath'].format(sim = sim) #
 SKIRTinputFilePath = params['SkirtFilepaths']['SKIRTinputFilePath'].format(sim = sim) # Path where the SKIRT input files will be stored
 SKIRToutputFilePath = params['SkirtFilepaths']['SKIRToutputFilePath'].format(sim = sim) # Path where the SKIRT output files will be stored
 
-
 # Set list of snapshots to postprocess
 
 Nprocesses = args.nproc
@@ -94,7 +93,7 @@ def preprocess(snapList):
 
             # Edit ski files
 
-            subprocess.run(['python', f'{dir_path}/editSkiFile.py', str(snap), str(ID), str(Rstar[idx]), str(Mdust[idx]), txtFilePath, SKIRTinputFilePath, args.Resolution])
+            subprocess.run(['python', f'{dir_path}/editSkiFile.py', str(snap), str(ID), str(Rstar[idx]), str(Mdust[idx]), txtFilePath, SKIRTinputFilePath, str(args.Resolution)])
 
     return skifilenames
 

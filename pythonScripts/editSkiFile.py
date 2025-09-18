@@ -114,13 +114,17 @@ def editSki(snapNum, haloID, Rstar):
     else:
 
         SigmaDust = Mdust / (np.pi * Rstar**2) # Dust surface density
-        maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
+
+        if Resolution == '5':
+
+            maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
+            # Slightly higher resolved spatial grid at m5 resolution
+
+        else: # Same for m6 and m7 for now
+
+            maxDustFraction = np.clip(10**(-1.5 - 0.75 * np.log10(SigmaDust)), a_min = 1e-6, a_max = 10**(-4.5))
 
         subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
-
-
-
-
 
 
     subprocess.run(['perl', '-pi', '-e', 's/numPackets=\"0/numPackets=\"' + str(Npp) + '/g', skifilename_halo])
@@ -137,4 +141,4 @@ def editSki(snapNum, haloID, Rstar):
 
 editSki(snapNum, haloID, Rstar)
 
-print('Elapsed time to edit ski file and calculate dust surface density:', datetime.now() - startTime)
+print('Elapsed time to edit ski file:', datetime.now() - startTime)
