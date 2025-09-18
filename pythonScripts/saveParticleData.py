@@ -140,7 +140,7 @@ def analysis(sg, halo_ID, snap):
     stars_x, stars_y, stars_z = sg.stars.coordinates.to('pc').to_physical().T
     # Recalculate stellar smoothing lengths, following COLIBRE tutorials
     stars_sml_fromStars = gsl((sg.stars.coordinates + sg.centre) % sg.metadata.boxsize, sg.metadata.boxsize,
-                        kernel_gamma = 1.0, neighbours = 65, speedup_fac = 2, dimension = 3).to('pc').to_physical() # Using neighbouring star particles
+                        kernel_gamma = 1.0, neighbours = 32, speedup_fac = 1, dimension = 3).to('pc').to_physical() # Using neighbouring star particles
 
     stars_sml_fromGas = sg.stars.smoothing_lengths.to('pc').to_physical() * 2.018932 # Using neighbouring gas particles
     stars_Z = sg.stars.metal_mass_fractions.to_physical()

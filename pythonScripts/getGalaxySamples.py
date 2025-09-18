@@ -56,8 +56,9 @@ simPath = params['ColibreFilepaths']['simPath'].format(simName=simName)
 sampleFolder = params['ColibreFilepaths']['sampleFolder'].format(simPath=simPath)
 
 header = 'Column 1: Halo ID\n' + \
-         'Column 2: Stellar mass (Msun)\n' + \
-         'Column 3: Stellar half-mass radius (kpc)\n'
+         'Column 2: Total stellar mass (Msun)\n' + \
+         'Column 3: Stellar half-mass radius (kpc)\n' + \
+         'Column 4: 50-kpc exclusive-sphere dust mass (Msun)\n'
 
 for snap in args.snaps:
     
@@ -68,12 +69,13 @@ for snap in args.snaps:
 
     Mstar = unyt.unyt_array(catalogue.bound_subhalo.stellar_mass.to_physical())
     Rstar = unyt.unyt_array(catalogue.bound_subhalo.half_mass_radius_stars.to_physical())
+    Mdust = unyt.unyt_array(catalogue.exclusive_sphere_50kpc.dust_small_grain_mass.to_physical() + catalogue.exclusive_sphere_50kpc.dust_large_grain_mass.to_physical())
 
     SEL = (Mstar >= unyt.unyt_quantity(float(params['SelectionCriteria']['minStellarMass']), 'Msun')) * (Mstar <= unyt.unyt_quantity(float(params['SelectionCriteria']['maxStellarMass']), 'Msun')) # Simple stellar mass selection. Replace this with 
     # your selection criteria.
 
     print(len(SEL[SEL]), 'galaxies selected in snapshot', snap)
 
-    sample_file = np.vstack((halo_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value)).T[SEL, :]
+    sample_file = np.vstack((halo_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value), Mdust.to('Msun').value).T[SEL, :]
 
-    np.savetxt(sampleFolder + 'sample_' + str(snap) + '.txt', sample_file, fmt = ['%d', '%.6e', '%.4f'], header = header)
+    np.savetxt(sampleFolder + 'sample_' + str(snap) + '.txt', sample_file, fmt = ['%d', '%.6e', '%.4f', '%.6e'], header = header)

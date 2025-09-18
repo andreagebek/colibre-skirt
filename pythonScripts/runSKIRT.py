@@ -81,7 +81,7 @@ def preprocess(snapList):
 
     for snap in snapList:
 
-        halo_IDs, Rstar = np.loadtxt(sampleFolder + '/sample_' + str(snap) + '.txt', unpack = True, usecols = [0, 2])
+        halo_IDs, Rstar, Mdust = np.loadtxt(sampleFolder + '/sample_' + str(snap) + '.txt', unpack = True, usecols = [0, 2, 3])
         halo_IDs = halo_IDs.astype(int)
 
         for idx, ID in enumerate(halo_IDs):
@@ -94,7 +94,7 @@ def preprocess(snapList):
 
             # Edit ski files
 
-            subprocess.run(['python', f'{dir_path}/editSkiFile.py', str(snap), str(ID), str(Rstar[idx]), txtFilePath, SKIRTinputFilePath])
+            subprocess.run(['python', f'{dir_path}/editSkiFile.py', str(snap), str(ID), str(Rstar[idx]), str(Mdust[idx]), txtFilePath, SKIRTinputFilePath, args.Resolution])
 
     return skifilenames
 

@@ -5,7 +5,6 @@ Edit a ski file
 import numpy as np
 import subprocess
 import sys
-import warnings
 from datetime import datetime
 import unyt
 import os
@@ -51,15 +50,18 @@ startTime = datetime.now()
 old_stars_tmin = unyt.unyt_quantity(10., 'Myr') # Minimum age in Myr for an evolved star particle. Also determines the TODDLERS averaging timescale
 # Don't change this unless you know what you're doing :)
 
-Npp = int(10**4.5) # Number of photon packets
+Npp = int(10**7.5) # Number of photon packets
 binTreeMaxLevel = 36 # Max refinement level of the spatial grid
 
 snapNum = sys.argv[1]
 haloID = sys.argv[2]
-Rstar = float(sys.argv[3])
+Rstar = unyt.unyt_quantity(float(sys.argv[3]), 'kpc')
+Mdust = unyt.unyt_quantity(float(sys.argv[4]), 'Msun')
 
-txtFilePath = sys.argv[4]
-SKIRTinputFilePath = sys.argv[5]
+txtFilePath = sys.argv[5]
+SKIRTinputFilePath = sys.argv[6]
+
+Resolution = sys.argv[7]
 
 f = open(txtFilePath + 'snap' + snapNum + '_' + 'ID' + haloID + '_stars.txt', 'r')
 header = f.readline() # Read first header line
@@ -103,57 +105,20 @@ def editSki(snapNum, haloID, Rstar):
     subprocess.run(['perl', '-pi', '-e', 's/minZ=\"-0/minZ=\"' + str(-SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
     subprocess.run(['perl', '-pi', '-e', 's/maxZ=\"0/maxZ=\"' + str(SKIRTboxsize.to('pc').value / 2.) + '/g', skifilename_halo])
 
+    if Mdust == 0: # No dust within 50-kpc exclusive sphere aperture -> run SKIRT without medium
 
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore') # Ignore warning if file is empty
-        gas_file = np.atleast_2d(np.loadtxt(txtFilePath + 'snap' + snapNum + '_ID' + haloID + '_gas.txt')) # Calculate dust surface density from the 
-        # original gas particle data, to avoid issues with negative dust masses due to TODDLERS dust subtraction
-
-    if np.size(gas_file, axis = 1) > 0: # if there are gas particles
-
-        dust_r = np.sqrt(gas_file[:, 0]**2 + gas_file[:, 1]**2 + gas_file[:, 2]**2) * 1e-3 # In kpc
-
-        dust_m = np.sum(gas_file[:, 10:], axis = 1) # In Msun
-
-        if (dust_m>0).sum() >= 2: # if there are more than 2 gas particles containing dust
-
-            dustMasses_sorted = dust_m[np.argsort(dust_r)]
-
-            idx_halfmass = np.min(np.argwhere((np.cumsum(dustMasses_sorted) / np.sum(dustMasses_sorted)) >= 0.5))
-
-            dustHalfMassRadius = np.sort(dust_r)[idx_halfmass]
-
-            dustHalfMass = (np.sum(dust_m) / 2.)
-
-            SigmaDust = dustHalfMass / (np.pi * dustHalfMassRadius**2) # In solar masses / kpc^2
-
-            maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
-
-            subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
-
-        
-
-        elif (dust_m>0).sum()==1: # if there are only one gas particle containing dust
-
-            maxDustFraction = 10**(-4.5)
-
-            subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
-
-
-
-        else:# if there is gas particles but dust mass is all 0
-
-            subprocess.run(['perl', '-pi', '-e', 's/simulationMode="[^"]*"/simulationMode="NoMedium"/g', skifilename_halo])
-
-            delete_medium_system(skifilename_halo)
-            
-    else:
-
-        # Change the skirt simulation to noMedium
-        
         subprocess.run(['perl', '-pi', '-e', 's/simulationMode="[^"]*"/simulationMode="NoMedium"/g', skifilename_halo])
 
         delete_medium_system(skifilename_halo)
+
+    else:
+
+        SigmaDust = Mdust / (np.pi * Rstar**2) # Dust surface density
+        maxDustFraction = np.clip(10**(-0.5 - np.log10(SigmaDust)), a_min = 10**(-6.5), a_max = 10**(-4.5))
+
+        subprocess.run(['perl', '-pi', '-e', 's/maxDustFraction=\"0/maxDustFraction=\"' + str(maxDustFraction) + '/g', skifilename_halo])
+
+
 
 
 
@@ -164,9 +129,9 @@ def editSki(snapNum, haloID, Rstar):
     subprocess.run(['perl', '-pi', '-e', 's#starforming_gas#' + SKIRTinputFiles + '_starforming_gas#g', skifilename_halo])
     subprocess.run(['perl', '-pi', '-e', 's/Period0/Period' + str(int(old_stars_tmin.to('Myr').value)) + '/g', skifilename_halo])
 
-    subprocess.run(['perl', '-pi', '-e', 's/radius=\"1 Rstar/radius=\"' + str(Rstar) + ' kpc' +  '/g', skifilename_halo])
-    subprocess.run(['perl', '-pi', '-e', 's/radius=\"3 Rstar/radius=\"' + str(3. * Rstar) + ' kpc' +  '/g', skifilename_halo])
-    subprocess.run(['perl', '-pi', '-e', 's/radius=\"5 Rstar/radius=\"' + str(5. * Rstar) + ' kpc' +  '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/radius=\"1 Rstar/radius=\"' + str(Rstar.to('kpc').value) + ' kpc' +  '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/radius=\"3 Rstar/radius=\"' + str(3. * Rstar.to('kpc').value) + ' kpc' +  '/g', skifilename_halo])
+    subprocess.run(['perl', '-pi', '-e', 's/radius=\"5 Rstar/radius=\"' + str(5. * Rstar.to('kpc').value) + ' kpc' +  '/g', skifilename_halo])
 
     return None
 
