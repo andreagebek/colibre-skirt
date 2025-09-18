@@ -3,14 +3,14 @@ ColibreFilepaths:
   sampleFolder: '/cosma/home/do019/dc-gebe1/' # Folder where the galaxy sample .txt files will be stored
   storeParticlesPath: '/cosma/home/do019/dc-gebe1/' # Folder where the COLIBRE particle .txt files will be stored
 
-  catalogueFile: '{simPath}/SOAP/halo_properties_{snap_nr:04d}.hdf5'
+  catalogueFile: '{simPath}/SOAP-HBT/halo_properties_{snap_nr:04d}.hdf5'
 
   # If the snapshots are distributed
-  virtualSnapshotFile: '{simPath}/SOAP/colibre_with_SOAP_membership_{snap_nr:04d}.hdf5'
+  virtualSnapshotFile: '{simPath}/SOAP-HBT/colibre_with_SOAP_membership_{snap_nr:04d}.hdf5'
 
   # If not distributed you need to provide the membership and snapshot information separately
   snapshotFile: '{simPath}/snapshots/colibre_{snap_nr:04d}.hdf5'
-  membershipFile: '{simPath}/SOAP/membership_{snap_nr:04d}.hdf5'
+  membershipFile: '{simPath}/SOAP-HBT/membership_{snap_nr:04d}.hdf5'
 
 SkirtFilepaths:
   skiFilepath: '/Users/agebek/Projects/Colibre/colibre-skirt/template_v{skifileversion}.ski' # The path to the ski file

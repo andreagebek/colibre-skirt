@@ -76,6 +76,6 @@ for snap in args.snaps:
 
     print(len(SEL[SEL]), 'galaxies selected in snapshot', snap)
 
-    sample_file = np.vstack((halo_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value), Mdust.to('Msun').value).T[SEL, :]
+    sample_file = np.vstack((halo_IDs, Mstar.to('Msun').value, Rstar.to('kpc').value, Mdust.to('Msun').value)).T[SEL, :]
 
     np.savetxt(sampleFolder + 'sample_' + str(snap) + '.txt', sample_file, fmt = ['%d', '%.6e', '%.4f', '%.6e'], header = header)
