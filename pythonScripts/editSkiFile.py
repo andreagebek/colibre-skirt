@@ -92,8 +92,6 @@ def editSki(snapNum, haloID, Rstar):
 
     subprocess.run(['cp', skifilename, skifilename_halo]) # copy the skirt file for each galaxy
 
-    # Calculate max dust fraction based on particle data
-
     subprocess.run(['perl', '-pi', '-e', 's/maxLevel=\"0/maxLevel=\"' + str(binTreeMaxLevel) + '/g', skifilename_halo])
 
     subprocess.run(['perl', '-pi', '-e', 's#dust.txt#' + SKIRTinputFiles + '_dust.txt#g', skifilename_halo])
