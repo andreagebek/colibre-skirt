@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A SKIRT parameter file © Astronomical Observatory, Ghent University -->
 <skirt-simulation-hierarchy type="MonteCarloSimulation" format="9" producer="SKIRT v9.0 (git a5aff55 built on 23/06/2025 at 11:15:08)" time="2024-07-02T17:42:01.333">
-    <MonteCarloSimulation userLevel="Expert" simulationMode="DustEmission" iteratePrimaryEmission="false" iterateSecondaryEmission="false" numPackets="0">
+    <MonteCarloSimulation userLevel="Expert" simulationMode="DustEmission" iteratePrimaryEmission="false" iterateSecondaryEmission="false" numPackets="1e7">
         <random type="Random">
             <Random seed="0"/>
         </random>
@@ -206,9 +206,9 @@
                     <SamplingOptions numDensitySamples="100" numPropertySamples="1" aggregateVelocity="Average"/>
                 </samplingOptions>
                 <grid type="SpatialGrid">
-                    <PolicyTreeSpatialGrid minX="-0 pc" maxX="0 pc" minY="-0 pc" maxY="0 pc" minZ="-0 pc" maxZ="0 pc" treeType="BinTree">
+                    <PolicyTreeSpatialGrid minX="-50 kpc" maxX="50 kpc" minY="-50 kpc" maxY="50 kpc" minZ="-50 kpc" maxZ="50 kpc" treeType="BinTree">
                         <policy type="TreePolicy">
-                            <DensityTreePolicy minLevel="15" maxLevel="0" maxDustFraction="0" maxDustOpticalDepth="0" wavelength="0.55 micron" maxDustDensityDispersion="0" maxElectronFraction="1e-6" maxGasFraction="1e-6"/>
+                            <DensityTreePolicy minLevel="15" maxLevel="36" maxDustFraction="3e-6" maxDustOpticalDepth="0" wavelength="0.55 micron" maxDustDensityDispersion="0" maxElectronFraction="1e-6" maxGasFraction="1e-6"/>
                         </policy>
                     </PolicyTreeSpatialGrid>
                 </grid>
@@ -217,37 +217,7 @@
         <instrumentSystem type="InstrumentSystem">
             <InstrumentSystem>
                 <instruments type="Instrument">
-                    <SEDInstrument instrumentName="SED_tot" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="0 pc" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
-                    <SEDInstrument instrumentName="SED_10kpc" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="10 kpc" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
                     <SEDInstrument instrumentName="SED_30kpc" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="30 kpc" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
-                    <SEDInstrument instrumentName="SED_50kpc" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="50 kpc" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
-                    <SEDInstrument instrumentName="SED_1Rstar" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="1 Rstar" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
-                    <SEDInstrument instrumentName="SED_3Rstar" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="3 Rstar" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
-                        <wavelengthGrid type="WavelengthGrid">
-                            <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
-                        </wavelengthGrid>
-                    </SEDInstrument>
-                    <SEDInstrument instrumentName="SED_5Rstar" distance="10 Mpc" inclination="0 deg" azimuth="0 deg" roll="0 deg" radius="5 Rstar" recordComponents="true" numScatteringLevels="0" recordPolarization="false" recordStatistics="false">
                         <wavelengthGrid type="WavelengthGrid">
                             <LogBorderWavelengthGrid minWavelength="0.09 micron" maxWavelength="2000 micron" numWavelengthBins="1000"/>
                         </wavelengthGrid>
