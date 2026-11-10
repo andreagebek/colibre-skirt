@@ -30,7 +30,18 @@
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
                         <sedFamily type="SEDFamily">
-                            <ToddlersSEDFamily sedMode="SFRNormalized" stellarTemplate="BPASSChab100Bin" includeDust="false" resolution="High" sfrPeriod="Period10Myr"/>
+                            <ToddlersSEDFamily sedMode="SFRNormalizedVariableDust" stellarTemplate="BPASSChab100Bin" includeDust="True" resolution="High" sfrPeriod="Period10Myr"/>
+                        </sedFamily>
+                        <wavelengthBiasDistribution type="WavelengthDistribution">
+                            <DefaultWavelengthDistribution/>
+                        </wavelengthBiasDistribution>
+                    </ParticleSource>
+                    <ParticleSource filename="SKIRTinputFiles/starforming_regions_noDust.txt" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
+                        <smoothingKernel type="SmoothingKernel">
+                            <QuarticSplineSmoothingKernel/>
+                        </smoothingKernel>
+                        <sedFamily type="SEDFamily">
+                            <ToddlersSEDFamily sedMode="SFRNormalizedVariableDust" stellarTemplate="BPASSChab100Bin" includeDust="false" resolution="High" sfrPeriod="Period10Myr"/>
                         </sedFamily>
                         <wavelengthBiasDistribution type="WavelengthDistribution">
                             <DefaultWavelengthDistribution/>
@@ -57,7 +68,7 @@
                 <dustEmissionOptions type="DustEmissionOptions">
                     <DustEmissionOptions dustEmissionType="Stochastic" includeHeatingByCMB="false" maxFractionOfPrimary="0.01" maxFractionOfPrevious="0.03" sourceWeight="1" wavelengthBias="0.5">
                         <cellLibrary type="SpatialCellLibrary">
-                            <AllCellsLibrary/>
+                            <TemperatureWavelengthCellLibrary numTemperatures="100" numWavelengths="50"/>
                         </cellLibrary>
                         <dustEmissionWLG type="DisjointWavelengthGrid">
                             <NestedLogWavelengthGrid minWavelengthBaseGrid="0.09 micron" maxWavelengthBaseGrid="2000 micron" numWavelengthsBaseGrid="100" minWavelengthSubGrid="1 micron" maxWavelengthSubGrid="30 micron" numWavelengthsSubGrid="100"/>
