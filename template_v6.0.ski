@@ -14,7 +14,7 @@
         <sourceSystem type="SourceSystem">
             <SourceSystem minWavelength="0.09 micron" maxWavelength="2000 micron" wavelengths="0.55 micron" sourceBias="0.5">
                 <sources type="Source">
-                    <ParticleSource filename="evolved_stars" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
+                    <ParticleSource filename="evolved_stars" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="x, y, z, smoothing length, initial stellar mass, metallicity, age" sourceWeight="1" wavelengthBias="0.5">
                         <smoothingKernel type="SmoothingKernel">
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
@@ -25,7 +25,7 @@
                             <DefaultWavelengthDistribution/>
                         </wavelengthBiasDistribution>
                     </ParticleSource>
-                    <ParticleSource filename="star_forming_regions_dusty" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
+                    <ParticleSource filename="star_forming_regions_dusty" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="x, y, z, smoothing length, metallicity, star formation efficiency, cloud density, dust scaling factor, star formation rate" sourceWeight="1" wavelengthBias="0.5">
                         <smoothingKernel type="SmoothingKernel">
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
@@ -36,7 +36,7 @@
                             <DefaultWavelengthDistribution/>
                         </wavelengthBiasDistribution>
                     </ParticleSource>
-                    <ParticleSource filename="star_forming_regions_dustfree" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="" sourceWeight="1" wavelengthBias="0.5">
+                    <ParticleSource filename="star_forming_regions_dustfree" importVelocity="false" importVelocityDispersion="false" importCurrentMass="false" importBias="false" useColumns="x, y, z, smoothing length, metallicity, star formation efficiency, cloud density, dust scaling factor, star formation rate" sourceWeight="1" wavelengthBias="0.5">
                         <smoothingKernel type="SmoothingKernel">
                             <QuarticSplineSmoothingKernel/>
                         </smoothingKernel>
