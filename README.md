@@ -11,7 +11,6 @@ This repository contains a tutorial (`tutorial.ipynb`) for postprocessing a sing
 The setup largely follows the COLIBRE-SKIRT pipeline described in [Gebek et al. 2026](https://scixplorer.org/abs/2026arXiv260714901G/abstract), with these main changes:
 - SKIRT 9 → SKIRT 10 (beta).
 - Dust-free TODDLERS v2 → dust-attenuated TODDLERS v2-varDTM templates for the star-forming regions, with the subgrid dust mass subtracted from the diffuse COLIBRE dust so that the total dust mass is conserved.
-- SKIRT input stored in a single HDF5 file per galaxy instead of separate text files.
 
 The previous version of the pipeline (v5, SKIRT 9 with `template_v5.0.ski`) is available under the `v5` tag of this repository.
 
