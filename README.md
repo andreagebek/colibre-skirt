@@ -31,4 +31,4 @@ skirt -i ./L025_m6_Thermal_snap0127_ID1694.hdf5 template_v6.0.ski
 This tutorial covers the basic COLIBRE-SKIRT workflow for a single galaxy. To postprocess more galaxies, an efficient workflow will require iterating over galaxies and using HPC systems. The `hpc_workflow_anna` branch of this repository contains such an example workflow (based on the v5 pipeline).
 
 ## Contact
-In case of questions or comments, please reach out to Andrea Gebek (andrea.gebek@ugent.be).
+In case of questions or comments, please reach out to Andrea Gebek (ag4038@bath.ac.uk).
